@@ -22,7 +22,7 @@ def load_rest_data(db):
     conn = sqlite3.connect(path+'/'+db)
     cur = conn.cursor()
 
-    cur.execute("SELECT name, category_id, building_id, rating FROM <TABLE_NAME>")
+    cur.execute("SELECT name, category_id, building_id, rating FROM restaurants")
     conn.commit()
 
     for restaurant in cur.fetchall():
@@ -38,8 +38,8 @@ def load_rest_data(db):
         rating = restaurant[3]
 
         out[name] = {}
-        out[name]["category"] = category
-        out[name]["building"] = building
+        out[name]["category"] = category[0]
+        out[name]["building"] = building[0]
         out[name]["rating"] = rating
 
     #Goal: {restuarant_name : {category : _, building : _, rating: _}}
@@ -64,25 +64,25 @@ def plot_rest_categories(db):
     category_ids = cur.fetchall()
 
     for id in category_ids:
-        cur.execute("SELECT COUNT (?) FROM restaurants WHERE category_id = (?)", (id[0],))
+        cur.execute("SELECT COUNT(name) FROM restaurants WHERE category_id = (?)", (id[0],))
         total = cur.fetchall()[0]
 
-        out[id[1]] = total
+        out[id[1]] = total[0]
     
     conn.commit()
 
     #create horizontal bar chart
-    x = out.keys()
-    y = out.values()
+    x = list(out.keys())
+    y = list(out.values())
 
-    fig, ax = plt.subplot()
-    ax.hbar(x, y)
-    ax.set_xlabel("Number of Restaurants")
-    ax.set_ylabel("Restaurant Category")
-    ax.set_title("Total Restaurants from Each Category on South U Street")
+    fig = plt.figure(figsize=(10, 5))
+    plt.barh(x, y)
+    plt.xlabel("Number of Restaurants")
+    plt.ylabel("Restaurant Category")
+    plt.title("Total Restaurants from Each Category on South U Street")
 
     fig.savefig("category_counts.png")
-    plt.plot()
+    plt.show()
 
     #Goal: {category : #}
     return out
@@ -100,10 +100,14 @@ def find_rest_in_building(building_num, db):
     cur = conn.cursor()
     
     #get data
-    cur.execute("SELECT name FROM restuarants WHERE building_id = (?) ORDER BY rating DESC", (building_num,))
+    cur.execute("SELECT restaurants.name FROM restaurants JOIN buildings ON restaurants.building_id = buildings.id WHERE buildings.building = (?) ORDER BY rating DESC", (building_num,))
     conn.commit()
 
-    return cur.fetchall()
+    out = []
+    for name in cur.fetchall():
+        out.append(name[0])
+
+    return out
 
 #EXTRA CREDIT
 def get_highest_rating(db): #Do this through DB as well
