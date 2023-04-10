@@ -72,6 +72,17 @@ def plot_rest_categories(db):
     conn.commit()
 
     #create horizontal bar chart
+    x = out.keys()
+    y = out.values()
+
+    fig, ax = plt.subplot()
+    ax.hbar(x, y)
+    ax.set_xlabel("Number of Restaurants")
+    ax.set_ylabel("Restaurant Category")
+    ax.set_title("Total Restaurants from Each Category on South U Street")
+
+    fig.savefig("category_counts.png")
+    plt.plot()
 
     #Goal: {category : #}
     return out
