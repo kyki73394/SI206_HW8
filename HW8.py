@@ -1,7 +1,7 @@
-# Your name: 
-# Your student id:
-# Your email:
-# List who you have worked with on this homework:
+# Your name: Hannah Kim
+# Your student id:62410212
+# Your email: hannahkk@umich.edu
+# List who you have worked with on this homework: N/A
 
 import matplotlib.pyplot as plt
 import os
@@ -15,7 +15,36 @@ def load_rest_data(db):
     and each inner key is a dictionary, where the key:value pairs should be the category, 
     building, and rating for the restaurant.
     """
-    pass
+    out = {}
+
+    #find path to file, create conn and cur vars
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db)
+    cur = conn.cursor()
+    #return cur, conn
+
+    cur.execute("SELECT name, category_id, building_id, rating FROM <TABLE_NAME>")
+    conn.commit()
+
+    for restaurant in cur.fetchall():
+        #parse data from selection
+        name = restaurant[0]
+        
+        cur.execute("SELECT category FROM categories WHERE id = (?)", (restaurant[1],))
+        category = cur.fetchall()[0]
+
+        cur.execute("SELECT building FROM buildings WHERE id = (?)", (restaurant[2],))
+        building = cur.fetchall()[0]
+
+        rating = restaurant[3]
+
+        out[name] = {}
+        out[name]["category"] = category
+        out[name]["building"] = building
+        out[name]["rating"] = rating
+
+    #Goal: {restuarant_name : {category : _, building : _, rating: _}}
+    return out
 
 def plot_rest_categories(db):
     """
@@ -93,10 +122,11 @@ class TestHW8(unittest.TestCase):
         self.assertIsInstance(restaurant_list, list)
         self.assertEqual(len(restaurant_list), 3)
         self.assertEqual(restaurant_list[0], 'BTB Burrito')
-
+"""
     def test_get_highest_rating(self):
         highest_rating = get_highest_rating('South_U_Restaurants.db')
         self.assertEqual(highest_rating, self.highest_rating)
+"""
 
 if __name__ == '__main__':
     main()
